@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\ClinicalSystemController;
+use App\Http\Controllers\CohortController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\LogbookEntryController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\RotationController;
 use App\Http\Controllers\SkillController;
 use App\Models\User;
@@ -51,6 +53,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified', 'role:' . User::ROLE_ADMIN . ',' . User::ROLE_SUPERADMIN])->group(function () {
     Route::get('/institutions', [InstitutionController::class, 'index'])->name('institutions.index');
     Route::post('/institutions', [InstitutionController::class, 'store'])->name('institutions.store');
+
+    Route::get('/programs', [ProgramController::class, 'index'])->name('programs.index');
+    Route::post('/programs', [ProgramController::class, 'store'])->name('programs.store');
+    Route::get('/programs/{program}', [ProgramController::class, 'show'])->name('programs.show');
+    Route::post('/programs/{program}/cohorts', [CohortController::class, 'store'])->name('programs.cohorts.store');
+
+    Route::post('/cohorts/{cohort}/enrollments', [CohortController::class, 'storeEnrollment'])->name('cohorts.enrollments.store');
 });
 
 require __DIR__.'/auth.php';

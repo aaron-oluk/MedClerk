@@ -57,6 +57,10 @@ class LogbookEntryController extends Controller
             'clinical_sign_id' => ['nullable', 'exists:clinical_signs,id'],
             'skill_id' => ['nullable', 'exists:skills,id'],
             'encounter_date' => ['required', 'date'],
+            'chief_complaint' => ['nullable', 'string'],
+            'examination_findings' => ['nullable', 'string'],
+            'impression' => ['nullable', 'string'],
+            'plan' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
         ]);
 
@@ -69,6 +73,17 @@ class LogbookEntryController extends Controller
         );
 
         $data['student_id'] = $rotation->student_id;
+
+        $data['findings'] = collect($data)
+            ->only(['chief_complaint', 'examination_findings', 'impression', 'plan'])
+            ->filter()
+            ->all();
+
+        $data = collect($data)->except(['chief_complaint', 'examination_findings', 'impression', 'plan'])->all();
+
+        if (empty($data['findings'])) {
+            unset($data['findings']);
+        }
 
         LogbookEntry::create($data);
 
