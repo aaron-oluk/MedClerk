@@ -5,14 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Institution;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class InstitutionController extends Controller
 {
-    public function index(): Response
+    public function index(): View
     {
-        return Inertia::render('Institutions/Index', [
+        return view('institutions.index', [
             'institutions' => Institution::query()->orderBy('name')->get(),
         ]);
     }

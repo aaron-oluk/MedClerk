@@ -23,14 +23,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/auth/logout', [AuthTokenController::class, 'logout']);
 
-    Route::apiResource('institutions', InstitutionController::class);
-    Route::apiResource('programs', ProgramController::class);
-    Route::apiResource('cohorts', CohortController::class);
-    Route::apiResource('clinical-systems', ClinicalSystemController::class);
-    Route::apiResource('clinical-signs', ClinicalSignController::class);
-    Route::apiResource('skills', SkillController::class);
-    Route::apiResource('rotations', RotationController::class);
-    Route::apiResource('logbook-entries', LogbookEntryController::class);
-    Route::apiResource('assessments', AssessmentController::class);
-    Route::apiResource('feedback', FeedbackController::class);
+    Route::name('api.')->group(function () {
+        Route::apiResource('institutions', InstitutionController::class);
+        Route::apiResource('programs', ProgramController::class);
+        Route::apiResource('cohorts', CohortController::class);
+        Route::apiResource('clinical-systems', ClinicalSystemController::class);
+        Route::apiResource('clinical-signs', ClinicalSignController::class);
+        Route::apiResource('skills', SkillController::class);
+        Route::apiResource('rotations', RotationController::class);
+        Route::apiResource('logbook-entries', LogbookEntryController::class);
+        Route::apiResource('assessments', AssessmentController::class);
+        Route::apiResource('feedback', FeedbackController::class);
+    });
 });
