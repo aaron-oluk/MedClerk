@@ -16,6 +16,9 @@
 /public/build
 /public/hot
 /public/storage
+/_ide_helper.php
+/_ide_helper_models.php
+/.phpstorm.meta.php
 /storage/*.key
 /storage/pail
 /vendor
