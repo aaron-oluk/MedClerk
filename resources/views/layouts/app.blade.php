@@ -7,6 +7,14 @@
 
         <title>{{ config('app.name', 'MedClerk') }}</title>
 
+        <!-- PWA -->
+        <link rel="manifest" href="/manifest.webmanifest">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <meta name="theme-color" content="#0f172a">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="MedClerk">
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -14,7 +22,14 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased bg-gray-100" x-data="{ sidebarOpen: false }">
+    <body class="font-sans antialiased bg-gray-100" x-data="{ sidebarOpen: false, online: true, pendingSync: 0 }"
+          x-init="
+              online = navigator.onLine;
+              pendingSync = window.MedClerkOfflineQueue ? window.MedClerkOfflineQueue.count() : 0;
+              window.addEventListener('online', () => online = true);
+              window.addEventListener('offline', () => online = false);
+              window.addEventListener('medclerk:queue-updated', (e) => pendingSync = e.detail.count);
+          ">
         <!-- Mobile sidebar overlay -->
         <div x-show="sidebarOpen"
              x-transition.opacity
@@ -51,6 +66,16 @@
                     </svg>
                 </button>
                 <span class="font-semibold tracking-tight text-gray-900">MedClerk</span>
+            </div>
+
+            <!-- Offline / pending sync status -->
+            <div x-show="! online || pendingSync > 0"
+                 x-transition
+                 class="px-4 py-2 text-center text-xs font-medium sm:px-6 lg:px-8"
+                 :class="! online ? 'bg-amber-50 text-amber-800' : 'bg-teal-50 text-teal-700'"
+                 style="display: none;">
+                <span x-show="! online">{{ __('You are offline. Cached pages remain available and logbook entries will be saved locally.') }}</span>
+                <span x-show="online && pendingSync > 0" x-text="pendingSync === 1 ? '{{ __('1 logbook entry is waiting to sync.') }}' : pendingSync + ' {{ __('logbook entries are waiting to sync.') }}'"></span>
             </div>
 
             <!-- Page Heading -->

@@ -11,14 +11,22 @@ class LogbookEntry extends Model
 {
     use Auditable, HasFactory;
 
+    public const TYPE_OBSERVED = 'observed';
+    public const TYPE_ASSISTED = 'assisted';
+    public const TYPE_PERFORMED = 'performed';
+
     protected $fillable = [
+        'client_uuid',
         'rotation_id',
         'student_id',
         'clinical_sign_id',
         'skill_id',
         'encounter_date',
+        'encounter_type',
         'findings',
         'notes',
+        'signed_off_by',
+        'signed_off_at',
     ];
 
     protected function casts(): array
@@ -26,6 +34,7 @@ class LogbookEntry extends Model
         return [
             'encounter_date' => 'date',
             'findings' => 'array',
+            'signed_off_at' => 'datetime',
         ];
     }
 
@@ -47,6 +56,16 @@ class LogbookEntry extends Model
     public function skill(): BelongsTo
     {
         return $this->belongsTo(Skill::class);
+    }
+
+    public function signedOffBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'signed_off_by');
+    }
+
+    public function isSignedOff(): bool
+    {
+        return $this->signed_off_at !== null;
     }
 
     protected function auditInstitutionId(): ?int

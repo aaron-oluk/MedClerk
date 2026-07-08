@@ -48,4 +48,17 @@ class LogbookEntryPolicy
 
         return $user->isAdmin() && $user->institution_id === $logbookEntry->rotation->institution_id;
     }
+
+    public function signOff(User $user, LogbookEntry $logbookEntry): bool
+    {
+        if ($user->isSuperadmin()) {
+            return true;
+        }
+
+        if ($user->isAdmin()) {
+            return $user->institution_id === $logbookEntry->rotation->institution_id;
+        }
+
+        return $user->id === $logbookEntry->rotation->supervisor_id;
+    }
 }
