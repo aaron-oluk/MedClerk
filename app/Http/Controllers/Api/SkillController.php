@@ -10,7 +10,7 @@ class SkillController extends Controller
 {
     public function index()
     {
-        return Skill::query()->with('clinicalSystem')->orderBy('name')->paginate(50);
+        return Skill::query()->with('clinicalSystem', 'tags')->orderBy('name')->paginate(50);
     }
 
     public function show(Skill $skill)
@@ -28,6 +28,8 @@ class SkillController extends Controller
             'description' => ['nullable', 'string'],
             'procedure_steps' => ['nullable', 'array'],
             'competency_codes' => ['nullable', 'array'],
+            'equipment' => ['nullable', 'array'],
+            'est_minutes' => ['nullable', 'integer', 'min:0'],
         ]);
 
         return Skill::create($data);
@@ -43,6 +45,8 @@ class SkillController extends Controller
             'description' => ['nullable', 'string'],
             'procedure_steps' => ['nullable', 'array'],
             'competency_codes' => ['nullable', 'array'],
+            'equipment' => ['nullable', 'array'],
+            'est_minutes' => ['nullable', 'integer', 'min:0'],
         ]);
 
         $skill->update($data);

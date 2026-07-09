@@ -15,16 +15,25 @@ class ClinicalSign extends Model
     protected $fillable = [
         'clinical_system_id',
         'name',
+        'eponym',
         'description',
         'interpretation',
+        'technique',
         'diagnostic_relevance',
+        'red_flags',
+        'difficulty',
+        'last_reviewed',
         'media_urls',
+        'media_type',
+        'media_duration',
     ];
 
     protected function casts(): array
     {
         return [
             'media_urls' => 'array',
+            'red_flags' => 'array',
+            'last_reviewed' => 'date',
         ];
     }
 

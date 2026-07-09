@@ -14,6 +14,8 @@ class ClinicalSystem extends Model
     protected $fillable = [
         'name',
         'description',
+        'icon',
+        'color',
     ];
 
     public function clinicalSigns(): HasMany

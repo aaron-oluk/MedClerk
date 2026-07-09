@@ -10,7 +10,11 @@ class ClinicalSystemController extends Controller
 {
     public function index()
     {
-        return ClinicalSystem::query()->orderBy('name')->paginate(50);
+        return ClinicalSystem::query()
+            ->withCount('clinicalSigns')
+            ->with('tags')
+            ->orderBy('name')
+            ->paginate(50);
     }
 
     public function show(ClinicalSystem $clinicalSystem)
@@ -25,6 +29,8 @@ class ClinicalSystemController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'icon' => ['nullable', 'string', 'max:50'],
+            'color' => ['nullable', 'string', 'max:20'],
         ]);
 
         return ClinicalSystem::create($data);
@@ -37,6 +43,8 @@ class ClinicalSystemController extends Controller
         $data = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'icon' => ['nullable', 'string', 'max:50'],
+            'color' => ['nullable', 'string', 'max:20'],
         ]);
 
         $clinicalSystem->update($data);

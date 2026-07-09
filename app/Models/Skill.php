@@ -18,6 +18,8 @@ class Skill extends Model
         'description',
         'procedure_steps',
         'competency_codes',
+        'equipment',
+        'est_minutes',
     ];
 
     protected function casts(): array
@@ -25,6 +27,7 @@ class Skill extends Model
         return [
             'procedure_steps' => 'array',
             'competency_codes' => 'array',
+            'equipment' => 'array',
         ];
     }
 
