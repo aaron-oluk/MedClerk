@@ -25,7 +25,7 @@ class RotationSeeder extends Seeder
         $student = User::where('email', 'student@medclerk.test')->firstOrFail();
         $lecturer = User::where('email', 'lecturer@medclerk.test')->firstOrFail();
 
-        $rotation = Rotation::firstOrCreate(
+        $rotation = Rotation::updateOrCreate(
             [
                 'institution_id' => $institution->id,
                 'department_id' => $department->id,
@@ -37,6 +37,7 @@ class RotationSeeder extends Seeder
                 'start_date' => '2026-05-01',
                 'end_date' => '2026-06-26',
                 'status' => 'active',
+                'required_encounters' => 40,
             ]
         );
 

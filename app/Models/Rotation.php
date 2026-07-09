@@ -20,6 +20,7 @@ class Rotation extends Model
         'start_date',
         'end_date',
         'status',
+        'required_encounters',
     ];
 
     protected function casts(): array

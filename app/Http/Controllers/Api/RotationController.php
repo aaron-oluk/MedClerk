@@ -11,7 +11,10 @@ class RotationController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = Rotation::query()->with('department', 'student', 'supervisor')->orderBy('start_date', 'desc');
+        $query = Rotation::query()
+            ->with('department', 'student', 'supervisor')
+            ->withCount('logbookEntries')
+            ->orderBy('start_date', 'desc');
 
         if ($user->isSuperadmin()) {
             // no scoping
@@ -31,6 +34,8 @@ class RotationController extends Controller
     {
         $this->authorize('view', $rotation);
 
+        $rotation->loadCount('logbookEntries');
+
         return $rotation->load('department', 'student', 'supervisor', 'logbookEntries', 'assessments');
     }
 
@@ -47,6 +52,7 @@ class RotationController extends Controller
             'start_date' => ['required', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'status' => ['nullable', 'string', 'in:scheduled,active,completed'],
+            'required_encounters' => ['nullable', 'integer', 'min:0'],
         ]);
 
         return Rotation::create($data);
@@ -63,6 +69,7 @@ class RotationController extends Controller
             'start_date' => ['sometimes', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'status' => ['sometimes', 'string', 'in:scheduled,active,completed'],
+            'required_encounters' => ['nullable', 'integer', 'min:0'],
         ]);
 
         $rotation->update($data);

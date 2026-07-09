@@ -4,17 +4,30 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ClinicalSystem;
+use App\Services\MasteryService;
 use Illuminate\Http\Request;
 
 class ClinicalSystemController extends Controller
 {
-    public function index()
+    public function __construct(private readonly MasteryService $mastery)
     {
-        return ClinicalSystem::query()
+    }
+
+    public function index(Request $request)
+    {
+        $systems = ClinicalSystem::query()
             ->withCount('clinicalSigns')
             ->with('tags')
             ->orderBy('name')
             ->paginate(50);
+
+        $masteryBySystem = $this->mastery->bySystemFor($request->user()->id);
+
+        $systems->getCollection()->each(
+            fn (ClinicalSystem $system) => $system->mastery_pct = $masteryBySystem[$system->id] ?? null
+        );
+
+        return $systems;
     }
 
     public function show(ClinicalSystem $clinicalSystem)

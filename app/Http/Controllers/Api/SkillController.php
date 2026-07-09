@@ -4,17 +4,24 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Skill;
+use App\Services\MasteryService;
 use Illuminate\Http\Request;
 
 class SkillController extends Controller
 {
+    public function __construct(private readonly MasteryService $mastery)
+    {
+    }
+
     public function index()
     {
         return Skill::query()->with('clinicalSystem', 'tags')->orderBy('name')->paginate(50);
     }
 
-    public function show(Skill $skill)
+    public function show(Request $request, Skill $skill)
     {
+        $skill->mastery_pct = $this->mastery->forSkill($request->user()->id, $skill->id);
+
         return $skill->load('clinicalSystem', 'tags');
     }
 

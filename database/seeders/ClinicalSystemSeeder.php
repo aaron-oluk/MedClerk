@@ -38,6 +38,31 @@ class ClinicalSystemSeeder extends Seeder
             ['description' => 'Examination and signs relevant to the musculoskeletal system.', 'icon' => 'bone', 'color' => '#0d9488'],
         );
 
+        $endocrine = ClinicalSystem::updateOrCreate(
+            ['name' => 'Endocrine System'],
+            ['description' => 'Examination and signs relevant to the endocrine system.', 'icon' => 'gland', 'color' => '#db2777'],
+        );
+
+        $renal = ClinicalSystem::updateOrCreate(
+            ['name' => 'Renal System'],
+            ['description' => 'Examination and signs relevant to the renal system.', 'icon' => 'kidney', 'color' => '#2563eb'],
+        );
+
+        $haematology = ClinicalSystem::updateOrCreate(
+            ['name' => 'Haematology'],
+            ['description' => 'Examination and signs relevant to the blood and lymphatic systems.', 'icon' => 'droplet', 'color' => '#b91c1c'],
+        );
+
+        $dermatology = ClinicalSystem::updateOrCreate(
+            ['name' => 'Dermatology'],
+            ['description' => 'Examination and signs relevant to the skin.', 'icon' => 'skin', 'color' => '#9333ea'],
+        );
+
+        $ent = ClinicalSystem::updateOrCreate(
+            ['name' => 'ENT and Neck'],
+            ['description' => 'Examination and signs relevant to the ear, nose, throat and neck.', 'icon' => 'ear', 'color' => '#65a30d'],
+        );
+
         ClinicalSign::updateOrCreate(
             ['clinical_system_id' => $cardiovascular->id, 'name' => 'Raised jugular venous pressure'],
             [
@@ -161,6 +186,82 @@ class ClinicalSystemSeeder extends Seeder
                 'last_reviewed' => '2026-05-25',
                 'media_type' => 'image',
                 'media_duration' => '2m 30s',
+            ]
+        );
+
+        ClinicalSign::updateOrCreate(
+            ['clinical_system_id' => $endocrine->id, 'name' => 'Exophthalmos'],
+            [
+                'description' => 'Anterior protrusion of the eyeball beyond the orbital margin, visible as sclera showing above the iris.',
+                'interpretation' => 'Best assessed from above and behind the seated patient, looking down over the forehead at the corneal-scleral relationship.',
+                'technique' => 'Stand behind the seated patient and tilt their head back gently. Look down over the forehead to assess how far the cornea protrudes beyond the supraorbital margin.',
+                'diagnostic_relevance' => 'Strongly associated with Graves disease. Unilateral protrusion raises concern for a retro-orbital mass.',
+                'red_flags' => ['Rapid onset with visual loss or painful eye movements suggests optic nerve compression and requires urgent referral'],
+                'difficulty' => 'intermediate',
+                'last_reviewed' => '2026-05-01',
+                'media_type' => 'image',
+                'media_duration' => '1m 50s',
+            ]
+        );
+
+        ClinicalSign::updateOrCreate(
+            ['clinical_system_id' => $renal->id, 'name' => 'Ballotable kidney'],
+            [
+                'description' => 'A palpable, ballotable mass in the flank on bimanual palpation, suggesting renal enlargement.',
+                'interpretation' => 'A positive balloting sign (the kidney is felt to float upward and tap the anterior hand) suggests hydronephrosis, polycystic kidneys, or a renal mass.',
+                'technique' => 'Place one hand in the loin posteriorly and one hand anteriorly below the costal margin. Push the posterior hand forward in short flicks while feeling for the kidney with the anterior hand.',
+                'diagnostic_relevance' => 'Bilateral ballotable kidneys suggest polycystic kidney disease. Unilateral enlargement suggests hydronephrosis or a renal tumour.',
+                'red_flags' => ['A pulsatile flank mass may represent an aortic aneurysm rather than a renal mass'],
+                'difficulty' => 'advanced',
+                'last_reviewed' => '2026-04-10',
+                'media_type' => 'video',
+                'media_duration' => '2m 55s',
+            ]
+        );
+
+        ClinicalSign::updateOrCreate(
+            ['clinical_system_id' => $haematology->id, 'name' => 'Cervical lymphadenopathy'],
+            [
+                'description' => 'Palpable enlargement of cervical lymph nodes, classified by site, size, mobility and consistency.',
+                'interpretation' => 'Nodes greater than 1 cm, hard, fixed, or non-tender are concerning for malignancy. Tender, mobile nodes suggest reactive or infective causes.',
+                'technique' => 'Examine the patient seated, neck slightly flexed. Use the pads of the fingers to palpate all cervical chains in sequence: submental, submandibular, preauricular, postauricular, occipital, anterior and posterior cervical, supraclavicular.',
+                'diagnostic_relevance' => 'Pattern of nodal involvement narrows the differential. Localised suggests local infection or malignancy, generalised suggests systemic infection, lymphoma, or HIV.',
+                'red_flags' => ['A hard fixed supraclavicular node (Virchow node) in an older patient raises suspicion for abdominal malignancy'],
+                'difficulty' => 'core',
+                'last_reviewed' => '2026-06-18',
+                'media_type' => 'video',
+                'media_duration' => '5m 02s',
+            ]
+        );
+
+        ClinicalSign::updateOrCreate(
+            ['clinical_system_id' => $dermatology->id, 'name' => 'Spider naevi'],
+            [
+                'description' => 'A central arteriole with radiating fine vessels that blanch on pressure to the central point, found in the distribution of the superior vena cava.',
+                'interpretation' => 'Up to a few spider naevi can be normal, particularly in pregnancy. Multiple lesions above the nipple line are more significant.',
+                'technique' => 'Inspect the face, neck, and upper chest in good light. Press on the central punctum with a pen tip and release, watching for the radiating vessels to refill from the centre outward.',
+                'diagnostic_relevance' => 'Multiple spider naevi suggest chronic liver disease due to reduced oestrogen clearance.',
+                'red_flags' => ['New crops of spider naevi with jaundice and ascites suggest decompensated liver disease'],
+                'difficulty' => 'core',
+                'last_reviewed' => '2026-03-12',
+                'media_type' => 'image',
+                'media_duration' => '1m 20s',
+            ]
+        );
+
+        ClinicalSign::updateOrCreate(
+            ['clinical_system_id' => $ent->id, 'name' => 'Rinne and Weber tests'],
+            [
+                'eponym' => 'Heinrich Rinne, Friedrich Weber',
+                'description' => 'Tuning fork tests comparing air and bone conduction to distinguish conductive from sensorineural hearing loss.',
+                'interpretation' => 'Rinne positive (air conduction louder than bone) is normal. Weber lateralising to the affected ear suggests conductive loss; lateralising to the unaffected ear suggests sensorineural loss.',
+                'technique' => 'For Rinne, strike a 512 Hz tuning fork and place the base on the mastoid process, then move it beside the ear canal, asking which is louder. For Weber, place the vibrating fork on the mid-forehead and ask where the sound is heard.',
+                'diagnostic_relevance' => 'Distinguishes conductive causes such as wax or otitis media from sensorineural causes such as presbycusis or acoustic neuroma.',
+                'red_flags' => ['Sudden unilateral sensorineural loss is an otological emergency requiring urgent assessment'],
+                'difficulty' => 'intermediate',
+                'last_reviewed' => '2026-02-20',
+                'media_type' => 'video',
+                'media_duration' => '3m 40s',
             ]
         );
     }
