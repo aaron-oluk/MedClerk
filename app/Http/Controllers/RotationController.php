@@ -71,6 +71,7 @@ class RotationController extends Controller
             'start_date' => ['required', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'status' => ['nullable', 'string', 'in:scheduled,active,completed'],
+            'required_encounters' => ['nullable', 'integer', 'min:0'],
         ]);
 
         if (! $user->isSuperadmin()) {

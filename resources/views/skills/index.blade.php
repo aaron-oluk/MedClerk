@@ -30,6 +30,8 @@
                                 <th class="py-2">{{ __('Name') }}</th>
                                 <th class="py-2">{{ __('Clinical system') }}</th>
                                 <th class="py-2">{{ __('Competency codes') }}</th>
+                                <th class="py-2">{{ __('Equipment') }}</th>
+                                <th class="py-2">{{ __('Est. minutes') }}</th>
                                 <th class="py-2">{{ __('Procedure steps') }}</th>
                                 <th class="py-2">{{ __('Tags') }}</th>
                             </tr>
@@ -40,6 +42,8 @@
                                     <td class="py-2">{{ $skill->name }}</td>
                                     <td class="py-2">{{ $skill->clinicalSystem->name ?? 'Not linked' }}</td>
                                     <td class="py-2 text-gray-500">{{ is_array($skill->competency_codes) ? implode(', ', $skill->competency_codes) : 'Not recorded' }}</td>
+                                    <td class="py-2 text-gray-500">{{ is_array($skill->equipment) ? implode(', ', $skill->equipment) : 'Not recorded' }}</td>
+                                    <td class="py-2 text-gray-500">{{ $skill->est_minutes ?? 'Not recorded' }}</td>
                                     <td class="py-2 text-gray-500">{{ is_array($skill->procedure_steps) ? count($skill->procedure_steps) : 0 }}</td>
                                     <td class="py-2">
                                         @foreach ($skill->tags as $tag)
@@ -49,7 +53,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="py-4 text-gray-500">{{ __('No skills yet.') }}</td>
+                                    <td colspan="7" class="py-4 text-gray-500">{{ __('No skills yet.') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -98,12 +102,38 @@
                             @enderror
                         </div>
 
-                        <div>
-                            <label for="procedure_steps" class="block font-medium text-sm text-gray-700">{{ __('Procedure steps') }}</label>
-                            <p class="text-xs text-gray-500 mt-1">{{ __('One step per line.') }}</p>
-                            <textarea id="procedure_steps" name="procedure_steps" rows="4"
-                                      class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">{{ old('procedure_steps') }}</textarea>
-                            @error('procedure_steps')
+                        <div x-data="{ steps: @js(old('procedure_steps', [['title' => '', 'detail' => '', 'caution' => '']])) }">
+                            <label class="block font-medium text-sm text-gray-700">{{ __('Procedure steps') }}</label>
+                            <p class="text-xs text-gray-500 mt-1">{{ __('Add each step of the procedure, with an optional caution note.') }}</p>
+
+                            <div class="mt-2 space-y-3">
+                                <template x-for="(step, index) in steps" :key="index">
+                                    <div class="border border-gray-200 rounded-lg p-4 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-xs font-medium text-gray-500" x-text="'{{ __('Step') }} ' + (index + 1)"></span>
+                                            <button type="button" @click="steps.splice(index, 1)" x-show="steps.length > 1" class="text-xs text-red-600 hover:text-red-500">
+                                                {{ __('Remove') }}
+                                            </button>
+                                        </div>
+
+                                        <input type="text" :name="'procedure_steps[' + index + '][title]'" x-model="step.title" placeholder="{{ __('Step title') }}"
+                                               class="block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm text-sm">
+
+                                        <textarea :name="'procedure_steps[' + index + '][detail]'" x-model="step.detail" rows="2" placeholder="{{ __('Detail') }}"
+                                                  class="block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm text-sm"></textarea>
+
+                                        <input type="text" :name="'procedure_steps[' + index + '][caution]'" x-model="step.caution" placeholder="{{ __('Caution (optional)') }}"
+                                               class="block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm text-sm">
+                                    </div>
+                                </template>
+                            </div>
+
+                            <button type="button" @click="steps.push({ title: '', detail: '', caution: '' })"
+                                    class="mt-3 inline-flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-lg font-medium text-xs text-gray-700 hover:bg-gray-50">
+                                {{ __('+ Add step') }}
+                            </button>
+
+                            @error('procedure_steps.*.title')
                                 <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                             @enderror
                         </div>
@@ -116,6 +146,27 @@
                             @error('competency_codes')
                                 <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                             @enderror
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                <label for="equipment" class="block font-medium text-sm text-gray-700">{{ __('Equipment') }}</label>
+                                <p class="text-xs text-gray-500 mt-1">{{ __('Comma separated, e.g. Stethoscope, Sphygmomanometer') }}</p>
+                                <input id="equipment" name="equipment" type="text" value="{{ old('equipment') }}"
+                                       class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
+                                @error('equipment')
+                                    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="est_minutes" class="block font-medium text-sm text-gray-700">{{ __('Est. minutes') }}</label>
+                                <input id="est_minutes" name="est_minutes" type="number" min="0" value="{{ old('est_minutes') }}" placeholder="e.g. 10"
+                                       class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
+                                @error('est_minutes')
+                                    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
 
                         <div>

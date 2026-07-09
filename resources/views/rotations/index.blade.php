@@ -19,6 +19,7 @@
                                 <th class="py-2">{{ __('Department') }}</th>
                                 <th class="py-2">{{ __('Supervisor') }}</th>
                                 <th class="py-2">{{ __('Dates') }}</th>
+                                <th class="py-2">{{ __('Required encounters') }}</th>
                                 <th class="py-2">{{ __('Status') }}</th>
                             </tr>
                         </thead>
@@ -35,6 +36,7 @@
                                             {{ __('to') }} {{ $rotation->end_date->format('d M Y') }}
                                         @endif
                                     </td>
+                                    <td class="py-2 text-gray-500">{{ $rotation->required_encounters ?? __('Not set') }}</td>
                                     <td class="py-2">
                                         <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $rotation->status === 'active' ? 'bg-teal-50 text-teal-700' : 'bg-gray-100 text-gray-600' }}">
                                             {{ ucfirst($rotation->status) }}
@@ -43,7 +45,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="py-4 text-gray-500">{{ __('No rotations yet.') }}</td>
+                                    <td colspan="7" class="py-4 text-gray-500">{{ __('No rotations yet.') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -165,6 +167,16 @@
                                     <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                                 @enderror
                             </div>
+                        </div>
+
+                        <div>
+                            <label for="required_encounters" class="block font-medium text-sm text-gray-700">{{ __('Required encounters') }}</label>
+                            <p class="text-xs text-gray-500 mt-1">{{ __('Target number of logbook encounters for this rotation.') }}</p>
+                            <input id="required_encounters" name="required_encounters" type="number" min="0" value="{{ old('required_encounters') }}" placeholder="e.g. 40"
+                                   class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
+                            @error('required_encounters')
+                                <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 bg-teal-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-teal-500 focus:bg-teal-500 active:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition ease-in-out duration-150">

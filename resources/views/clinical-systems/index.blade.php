@@ -28,6 +28,7 @@
                         <thead>
                             <tr class="border-b border-gray-200">
                                 <th class="py-2">{{ __('Clinical system') }}</th>
+                                <th class="py-2">{{ __('Style') }}</th>
                                 <th class="py-2">{{ __('Signs') }}</th>
                                 <th class="py-2">{{ __('Skills') }}</th>
                                 <th class="py-2">{{ __('Tags') }}</th>
@@ -38,6 +39,12 @@
                             @forelse ($systems as $system)
                                 <tr class="border-b border-gray-100">
                                     <td class="py-2">{{ $system->name }}</td>
+                                    <td class="py-2">
+                                        <span class="inline-flex items-center gap-1.5">
+                                            <span class="inline-block w-3 h-3 rounded-full border border-gray-200" style="background-color: {{ $system->color ?? '#e5e7eb' }}"></span>
+                                            <span class="text-gray-500">{{ $system->icon ?? __('Not set') }}</span>
+                                        </span>
+                                    </td>
                                     <td class="py-2">{{ $system->clinical_signs_count }}</td>
                                     <td class="py-2">{{ $system->skills_count }}</td>
                                     <td class="py-2">
@@ -53,7 +60,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="py-4 text-gray-500">{{ __('No clinical systems yet.') }}</td>
+                                    <td colspan="6" class="py-4 text-gray-500">{{ __('No clinical systems yet.') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -96,6 +103,28 @@
                             @error('tags')
                                 <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                             @enderror
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                <label for="icon" class="block font-medium text-sm text-gray-700">{{ __('Icon') }}</label>
+                                <p class="text-xs text-gray-500 mt-1">{{ __('One of: heart, lungs, stomach, brain, bone, gland, kidney, droplet, skin, ear.') }}</p>
+                                <input id="icon" name="icon" type="text" value="{{ old('icon') }}" placeholder="e.g. heart"
+                                       class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
+                                @error('icon')
+                                    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="color" class="block font-medium text-sm text-gray-700">{{ __('Colour') }}</label>
+                                <p class="text-xs text-gray-500 mt-1">{{ __('Used for the icon badge and mastery bar in the mobile app.') }}</p>
+                                <input id="color" name="color" type="color" value="{{ old('color', '#0d9488') }}"
+                                       class="mt-1 block h-10 w-20 border-gray-300 rounded-lg shadow-sm">
+                                @error('color')
+                                    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
 
                         <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 bg-teal-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-teal-500 focus:bg-teal-500 active:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition ease-in-out duration-150">

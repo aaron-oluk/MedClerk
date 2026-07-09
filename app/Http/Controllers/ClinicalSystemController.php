@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ParsesDelimitedInput;
 use App\Http\Controllers\Concerns\SyncsTags;
 use App\Models\ClinicalSign;
 use App\Models\ClinicalSystem;
@@ -11,7 +12,7 @@ use Illuminate\View\View;
 
 class ClinicalSystemController extends Controller
 {
-    use SyncsTags;
+    use ParsesDelimitedInput, SyncsTags;
 
     public function index(Request $request): View
     {
@@ -56,6 +57,8 @@ class ClinicalSystemController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'icon' => ['nullable', 'string', 'max:50'],
+            'color' => ['nullable', 'string', 'max:20'],
             'tags' => ['nullable', 'string'],
         ]);
 
@@ -75,10 +78,17 @@ class ClinicalSystemController extends Controller
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'eponym' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'interpretation' => ['nullable', 'string'],
+            'technique' => ['nullable', 'string'],
             'diagnostic_relevance' => ['nullable', 'string'],
+            'red_flags' => ['nullable', 'string'],
+            'difficulty' => ['nullable', 'string', 'in:core,intermediate,advanced'],
+            'last_reviewed' => ['nullable', 'date'],
             'media_urls' => ['nullable', 'string'],
+            'media_type' => ['nullable', 'string', 'in:video,image,audio,text'],
+            'media_duration' => ['nullable', 'string', 'max:20'],
             'tags' => ['nullable', 'string'],
         ]);
 
@@ -87,16 +97,20 @@ class ClinicalSystemController extends Controller
 
         $data['clinical_system_id'] = $clinicalSystem->id;
 
-        $mediaUrls = collect(preg_split('/\r\n|\r|\n/', $data['media_urls'] ?? ''))
-            ->map(fn ($url) => trim($url))
-            ->filter()
-            ->values()
-            ->all();
+        $mediaUrls = $this->linesToArray($data['media_urls'] ?? null);
 
         if (empty($mediaUrls)) {
             unset($data['media_urls']);
         } else {
             $data['media_urls'] = $mediaUrls;
+        }
+
+        $redFlags = $this->linesToArray($data['red_flags'] ?? null);
+
+        if (empty($redFlags)) {
+            unset($data['red_flags']);
+        } else {
+            $data['red_flags'] = $redFlags;
         }
 
         $sign = ClinicalSign::create($data);

@@ -32,8 +32,11 @@
                         <thead>
                             <tr class="border-b border-gray-200">
                                 <th class="py-2">{{ __('Name') }}</th>
+                                <th class="py-2">{{ __('Difficulty') }}</th>
                                 <th class="py-2">{{ __('Interpretation') }}</th>
+                                <th class="py-2">{{ __('Technique') }}</th>
                                 <th class="py-2">{{ __('Diagnostic relevance') }}</th>
+                                <th class="py-2">{{ __('Red flags') }}</th>
                                 <th class="py-2">{{ __('Media') }}</th>
                                 <th class="py-2">{{ __('Tags') }}</th>
                             </tr>
@@ -41,15 +44,34 @@
                         <tbody>
                             @forelse ($system->clinicalSigns as $sign)
                                 <tr class="border-b border-gray-100">
-                                    <td class="py-2">{{ $sign->name }}</td>
+                                    <td class="py-2">
+                                        {{ $sign->name }}
+                                        @if ($sign->eponym)
+                                            <span class="block text-xs text-gray-400">{{ $sign->eponym }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="py-2">
+                                        <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">{{ ucfirst($sign->difficulty) }}</span>
+                                    </td>
                                     <td class="py-2 text-gray-500">{{ $sign->interpretation ?? 'Not recorded' }}</td>
+                                    <td class="py-2 text-gray-500">{{ $sign->technique ?? 'Not recorded' }}</td>
                                     <td class="py-2 text-gray-500">{{ $sign->diagnostic_relevance ?? 'Not recorded' }}</td>
+                                    <td class="py-2 text-gray-500">
+                                        @forelse ($sign->red_flags ?? [] as $flag)
+                                            <span class="block">&bull; {{ $flag }}</span>
+                                        @empty
+                                            <span class="text-gray-400">{{ __('None') }}</span>
+                                        @endforelse
+                                    </td>
                                     <td class="py-2">
                                         @forelse ($sign->media_urls ?? [] as $index => $url)
                                             <a href="{{ $url }}" target="_blank" rel="noopener" class="text-teal-600 hover:text-teal-500 block">{{ __('File :number', ['number' => $index + 1]) }}</a>
                                         @empty
                                             <span class="text-gray-400">{{ __('None') }}</span>
                                         @endforelse
+                                        @if ($sign->media_duration)
+                                            <span class="block text-xs text-gray-400">{{ ucfirst($sign->media_type) }}, {{ $sign->media_duration }}</span>
+                                        @endif
                                     </td>
                                     <td class="py-2">
                                         @foreach ($sign->tags as $tag)
@@ -59,7 +81,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="py-4 text-gray-500">{{ __('No clinical signs recorded yet.') }}</td>
+                                    <td colspan="8" class="py-4 text-gray-500">{{ __('No clinical signs recorded yet.') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -92,13 +114,24 @@
                             {{ __('Add a clinical sign') }}
                         </h3>
 
-                        <div>
-                            <label for="name" class="block font-medium text-sm text-gray-700">{{ __('Name') }}</label>
-                            <input id="name" name="name" type="text" value="{{ old('name') }}" required placeholder="e.g. Raised jugular venous pressure"
-                                   class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
-                            @error('name')
-                                <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
-                            @enderror
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                <label for="name" class="block font-medium text-sm text-gray-700">{{ __('Name') }}</label>
+                                <input id="name" name="name" type="text" value="{{ old('name') }}" required placeholder="e.g. Raised jugular venous pressure"
+                                       class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
+                                @error('name')
+                                    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="eponym" class="block font-medium text-sm text-gray-700">{{ __('Eponym') }}</label>
+                                <input id="eponym" name="eponym" type="text" value="{{ old('eponym') }}" placeholder="e.g. Kussmaul's sign"
+                                       class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
+                                @error('eponym')
+                                    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
 
                         <div>
@@ -120,12 +153,56 @@
                         </div>
 
                         <div>
+                            <label for="technique" class="block font-medium text-sm text-gray-700">{{ __('Technique') }}</label>
+                            <textarea id="technique" name="technique" rows="2" placeholder="How to elicit this sign"
+                                      class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">{{ old('technique') }}</textarea>
+                            @error('technique')
+                                <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
                             <label for="diagnostic_relevance" class="block font-medium text-sm text-gray-700">{{ __('Diagnostic relevance') }}</label>
                             <textarea id="diagnostic_relevance" name="diagnostic_relevance" rows="2"
                                       class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">{{ old('diagnostic_relevance') }}</textarea>
                             @error('diagnostic_relevance')
                                 <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                             @enderror
+                        </div>
+
+                        <div>
+                            <label for="red_flags" class="block font-medium text-sm text-gray-700">{{ __('Red flags') }}</label>
+                            <p class="text-xs text-gray-500 mt-1">{{ __('One red flag per line.') }}</p>
+                            <textarea id="red_flags" name="red_flags" rows="3"
+                                      class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">{{ old('red_flags') }}</textarea>
+                            @error('red_flags')
+                                <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                <label for="difficulty" class="block font-medium text-sm text-gray-700">{{ __('Difficulty') }}</label>
+                                <select id="difficulty" name="difficulty"
+                                        class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
+                                    <option value="">{{ __('Not set') }}</option>
+                                    <option value="core" @selected(old('difficulty') === 'core')>{{ __('Core') }}</option>
+                                    <option value="intermediate" @selected(old('difficulty') === 'intermediate')>{{ __('Intermediate') }}</option>
+                                    <option value="advanced" @selected(old('difficulty') === 'advanced')>{{ __('Advanced') }}</option>
+                                </select>
+                                @error('difficulty')
+                                    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="last_reviewed" class="block font-medium text-sm text-gray-700">{{ __('Last reviewed') }}</label>
+                                <input id="last_reviewed" name="last_reviewed" type="date" value="{{ old('last_reviewed') }}"
+                                       class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
+                                @error('last_reviewed')
+                                    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
 
                         <div>
@@ -136,6 +213,32 @@
                             @error('media_urls')
                                 <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                             @enderror
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                <label for="media_type" class="block font-medium text-sm text-gray-700">{{ __('Media type') }}</label>
+                                <select id="media_type" name="media_type"
+                                        class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
+                                    <option value="">{{ __('Not set') }}</option>
+                                    <option value="video" @selected(old('media_type') === 'video')>{{ __('Video') }}</option>
+                                    <option value="image" @selected(old('media_type') === 'image')>{{ __('Image') }}</option>
+                                    <option value="audio" @selected(old('media_type') === 'audio')>{{ __('Audio') }}</option>
+                                    <option value="text" @selected(old('media_type') === 'text')>{{ __('Text') }}</option>
+                                </select>
+                                @error('media_type')
+                                    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="media_duration" class="block font-medium text-sm text-gray-700">{{ __('Media duration') }}</label>
+                                <input id="media_duration" name="media_duration" type="text" value="{{ old('media_duration') }}" placeholder="e.g. 4m 12s"
+                                       class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
+                                @error('media_duration')
+                                    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
 
                         <div>
