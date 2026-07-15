@@ -58,29 +58,16 @@
                         </h3>
 
                         <div>
-                            <label for="rotation_id" class="block font-medium text-sm text-gray-700">{{ __('Student and rotation') }}</label>
-                            <select id="rotation_id" name="rotation_id" required
+                            <label for="logbook_entry_id" class="block font-medium text-sm text-gray-700">{{ __('Logged encounter') }}</label>
+                            <select id="logbook_entry_id" name="logbook_entry_id" required
                                     class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
-                                @foreach ($rotations as $rotation)
-                                    <option value="{{ $rotation->id }}" @selected(old('rotation_id') == $rotation->id)>
-                                        {{ $rotation->student->name }} ({{ $rotation->name }})
+                                @foreach ($pendingLogs as $log)
+                                    <option value="{{ $log->id }}" @selected(old('logbook_entry_id') == $log->id)>
+                                        {{ $log->student->name }} — {{ $log->skill->name }} ({{ $log->encounter_date->format('d M Y') }})
                                     </option>
                                 @endforeach
                             </select>
-                            @error('rotation_id')
-                                <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="skill_id" class="block font-medium text-sm text-gray-700">{{ __('Skill') }}</label>
-                            <select id="skill_id" name="skill_id" required
-                                    class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
-                                @foreach ($skills as $skill)
-                                    <option value="{{ $skill->id }}" @selected(old('skill_id') == $skill->id)>{{ $skill->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('skill_id')
+                            @error('logbook_entry_id')
                                 <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                             @enderror
                         </div>

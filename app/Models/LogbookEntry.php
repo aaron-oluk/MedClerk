@@ -6,6 +6,7 @@ use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LogbookEntry extends Model
 {
@@ -65,6 +66,11 @@ class LogbookEntry extends Model
     public function signedOffBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'signed_off_by');
+    }
+
+    public function assessments(): HasMany
+    {
+        return $this->hasMany(Assessment::class);
     }
 
     public function isSignedOff(): bool

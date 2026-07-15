@@ -6,6 +6,7 @@ use App\Models\Assessment;
 use App\Models\Department;
 use App\Models\Feedback;
 use App\Models\Institution;
+use App\Models\LogbookEntry;
 use App\Models\Rotation;
 use App\Models\Skill;
 use App\Models\User;
@@ -16,11 +17,9 @@ class FeedbackIdorTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function makeAssessment(User $assessor, ?int $institutionId = null): Assessment
+    protected function makeAssessment(User $assessor): Assessment
     {
-        $institution = $institutionId
-            ? Institution::find($institutionId)
-            : Institution::create(['name' => 'Test University', 'slug' => 'test-university-'.uniqid()]);
+        $institution = Institution::create(['name' => 'Test University', 'slug' => 'test-university-'.uniqid()]);
         $department = Department::create(['institution_id' => $institution->id, 'name' => 'Medicine']);
         $student = User::factory()->student()->create(['institution_id' => $institution->id]);
         $rotation = Rotation::create([
@@ -33,11 +32,20 @@ class FeedbackIdorTest extends TestCase
             'status' => 'active',
         ]);
         $skill = Skill::create(['name' => 'History taking']);
+        $log = LogbookEntry::create([
+            'rotation_id' => $rotation->id,
+            'student_id' => $student->id,
+            'skill_id' => $skill->id,
+            'encounter_date' => now()->toDateString(),
+            'consent_confirmed' => true,
+            'consent_confirmed_at' => now(),
+        ]);
 
         return Assessment::create([
             'student_id' => $student->id,
             'skill_id' => $skill->id,
             'rotation_id' => $rotation->id,
+            'logbook_entry_id' => $log->id,
             'assessor_id' => $assessor->id,
             'score' => 8,
             'max_score' => 10,
@@ -78,10 +86,11 @@ class FeedbackIdorTest extends TestCase
         $this->assertSame(0, Feedback::count());
     }
 
-    public function test_admin_cannot_give_feedback_outside_their_institution(): void
+    public function test_admin_cannot_give_feedback_at_all(): void
     {
-        $assessment = $this->makeAssessment(User::factory()->lecturer()->create());
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $assessor = User::factory()->lecturer()->create();
+        $assessment = $this->makeAssessment($assessor);
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN, 'institution_id' => $assessment->rotation->institution_id]);
 
         $response = $this->actingAs($admin)->post('/feedback', $this->payload($assessment));
 
@@ -89,13 +98,13 @@ class FeedbackIdorTest extends TestCase
         $this->assertSame(0, Feedback::count());
     }
 
-    public function test_admin_can_give_feedback_within_their_institution(): void
+    public function test_superadmin_can_give_feedback_on_any_assessment(): void
     {
         $assessor = User::factory()->lecturer()->create();
         $assessment = $this->makeAssessment($assessor);
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN, 'institution_id' => $assessment->rotation->institution_id]);
+        $superadmin = User::factory()->create(['role' => User::ROLE_SUPERADMIN]);
 
-        $response = $this->actingAs($admin)->post('/feedback', $this->payload($assessment));
+        $response = $this->actingAs($superadmin)->post('/feedback', $this->payload($assessment));
 
         $response->assertRedirect('/feedback');
         $this->assertSame(1, Feedback::count());

@@ -16,6 +16,7 @@ class Assessment extends Model
         'student_id',
         'skill_id',
         'rotation_id',
+        'logbook_entry_id',
         'assessor_id',
         'score',
         'max_score',
@@ -45,6 +46,11 @@ class Assessment extends Model
     public function rotation(): BelongsTo
     {
         return $this->belongsTo(Rotation::class);
+    }
+
+    public function logbookEntry(): BelongsTo
+    {
+        return $this->belongsTo(LogbookEntry::class);
     }
 
     public function assessor(): BelongsTo

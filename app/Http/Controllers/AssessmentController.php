@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assessment;
-use App\Models\Rotation;
-use App\Models\Skill;
+use App\Models\LogbookEntry;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -27,20 +26,22 @@ class AssessmentController extends Controller
 
         $assessments = $query->paginate(15)->withQueryString();
 
-        $rotations = collect();
-        $skills = collect();
+        $pendingLogs = collect();
 
         if ($user->isLecturer()) {
-            $rotations = Rotation::with('student')->where('supervisor_id', $user->id)->orderBy('start_date', 'desc')->get();
-            $skills = Skill::orderBy('name')->get();
+            $pendingLogs = LogbookEntry::whereHas('rotation', fn ($q) => $q->where('supervisor_id', $user->id))
+                ->whereNotNull('skill_id')
+                ->whereDoesntHave('assessments')
+                ->with('student', 'skill', 'rotation')
+                ->orderBy('encounter_date', 'desc')
+                ->get();
         }
 
-        $canCreate = $user->can('create', Assessment::class) && $rotations->isNotEmpty();
+        $canCreate = $user->can('create', Assessment::class) && $pendingLogs->isNotEmpty();
 
         return view('assessments.index', [
             'assessments' => $assessments,
-            'rotations' => $rotations,
-            'skills' => $skills,
+            'pendingLogs' => $pendingLogs,
             'canCreate' => $canCreate,
         ]);
     }
@@ -50,24 +51,26 @@ class AssessmentController extends Controller
         $this->authorize('create', Assessment::class);
 
         $data = $request->validate([
-            'rotation_id' => ['required', 'exists:rotations,id'],
-            'skill_id' => ['required', 'exists:skills,id'],
+            'logbook_entry_id' => ['required', 'exists:logbook_entries,id'],
             'score' => ['required', 'numeric', 'min:0'],
             'max_score' => ['required', 'numeric', 'gte:score'],
             'assessed_at' => ['required', 'date'],
         ]);
 
-        $rotation = Rotation::findOrFail($data['rotation_id']);
+        $logbookEntry = LogbookEntry::with('rotation')->findOrFail($data['logbook_entry_id']);
 
         abort_unless(
-            $request->user()->isSuperadmin()
-                || ($request->user()->isAdmin() && $request->user()->institution_id === $rotation->institution_id)
-                || ($request->user()->isLecturer() && $request->user()->id === $rotation->supervisor_id),
+            $request->user()->isSuperadmin() || $request->user()->id === $logbookEntry->rotation->supervisor_id,
             403,
-            'You can only assess students on your own supervised rotations.'
+            "You can only assess your own students' logged encounters."
         );
 
-        $data['student_id'] = $rotation->student_id;
+        abort_if($logbookEntry->skill_id === null, 422, 'This encounter is not linked to a skill and cannot be scored.');
+
+        $data['rotation_id'] = $logbookEntry->rotation_id;
+        $data['skill_id'] = $logbookEntry->skill_id;
+        $data['student_id'] = $logbookEntry->student_id;
+        $data['logbook_entry_id'] = $logbookEntry->id;
         $data['assessor_id'] = $request->user()->id;
 
         Assessment::create($data);

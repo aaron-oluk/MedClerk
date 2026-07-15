@@ -51,12 +51,10 @@ class FeedbackController extends Controller
             'follow_up_date' => ['nullable', 'date'],
         ]);
 
-        $assessment = Assessment::with('rotation')->findOrFail($data['assessment_id']);
+        $assessment = Assessment::findOrFail($data['assessment_id']);
 
         abort_unless(
-            $request->user()->isSuperadmin()
-                || ($request->user()->isAdmin() && $request->user()->institution_id === $assessment->rotation->institution_id)
-                || ($request->user()->isLecturer() && $request->user()->id === $assessment->assessor_id),
+            $request->user()->isSuperadmin() || $request->user()->id === $assessment->assessor_id,
             403,
             'You can only give feedback on assessments you gave.'
         );

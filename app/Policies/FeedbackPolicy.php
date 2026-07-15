@@ -24,7 +24,7 @@ class FeedbackPolicy
 
     public function create(User $user): bool
     {
-        return $user->isLecturer() || $user->isAdmin() || $user->isSuperadmin();
+        return $user->isLecturer() || $user->isSuperadmin();
     }
 
     public function update(User $user, Feedback $feedback): bool
@@ -33,19 +33,11 @@ class FeedbackPolicy
             return true;
         }
 
-        if ($user->id === $feedback->given_by) {
-            return true;
-        }
-
-        return $user->isAdmin() && $user->institution_id === $feedback->student->institution_id;
+        return $user->id === $feedback->given_by;
     }
 
     public function delete(User $user, Feedback $feedback): bool
     {
-        if ($user->isSuperadmin()) {
-            return true;
-        }
-
-        return $user->isAdmin() && $user->institution_id === $feedback->student->institution_id;
+        return $user->isSuperadmin();
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Assessment;
 use App\Models\Department;
 use App\Models\Feedback;
 use App\Models\Institution;
+use App\Models\LogbookEntry;
 use App\Models\Rotation;
 use App\Models\Skill;
 use App\Models\User;
@@ -32,11 +33,20 @@ class FeedbackIdorTest extends TestCase
             'status' => 'active',
         ]);
         $skill = Skill::create(['name' => 'History taking']);
+        $log = LogbookEntry::create([
+            'rotation_id' => $rotation->id,
+            'student_id' => $student->id,
+            'skill_id' => $skill->id,
+            'encounter_date' => now()->toDateString(),
+            'consent_confirmed' => true,
+            'consent_confirmed_at' => now(),
+        ]);
 
         return Assessment::create([
             'student_id' => $student->id,
             'skill_id' => $skill->id,
             'rotation_id' => $rotation->id,
+            'logbook_entry_id' => $log->id,
             'assessor_id' => $assessor->id,
             'score' => 8,
             'max_score' => 10,
@@ -91,5 +101,21 @@ class FeedbackIdorTest extends TestCase
         $response->assertCreated();
         $this->assertSame($assessment->student_id, Feedback::first()->student_id);
         $this->assertNotSame($otherStudent->id, Feedback::first()->student_id);
+    }
+
+    public function test_admin_cannot_give_feedback_at_all(): void
+    {
+        $assessor = User::factory()->lecturer()->create();
+        $assessment = $this->makeAssessment($assessor);
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN, 'institution_id' => $assessment->rotation->institution_id]);
+        Sanctum::actingAs($admin);
+
+        $response = $this->postJson('/api/feedback', [
+            'assessment_id' => $assessment->id,
+            'strengths' => 'Clear communication',
+        ]);
+
+        $response->assertForbidden();
+        $this->assertSame(0, Feedback::count());
     }
 }

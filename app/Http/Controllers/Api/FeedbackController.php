@@ -46,12 +46,10 @@ class FeedbackController extends Controller
         ]);
 
         $user = $request->user();
-        $assessment = Assessment::with('rotation')->findOrFail($data['assessment_id']);
+        $assessment = Assessment::findOrFail($data['assessment_id']);
 
         abort_unless(
-            $user->isSuperadmin()
-                || ($user->isAdmin() && $user->institution_id === $assessment->rotation->institution_id)
-                || ($user->isLecturer() && $user->id === $assessment->assessor_id),
+            $user->isSuperadmin() || $user->id === $assessment->assessor_id,
             403,
             'You can only give feedback on assessments you gave.'
         );

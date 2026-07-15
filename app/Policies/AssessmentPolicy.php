@@ -24,7 +24,7 @@ class AssessmentPolicy
 
     public function create(User $user): bool
     {
-        return $user->isLecturer() || $user->isAdmin() || $user->isSuperadmin();
+        return $user->isLecturer() || $user->isSuperadmin();
     }
 
     public function update(User $user, Assessment $assessment): bool
@@ -33,19 +33,11 @@ class AssessmentPolicy
             return true;
         }
 
-        if ($user->id === $assessment->assessor_id) {
-            return true;
-        }
-
-        return $user->isAdmin() && $user->institution_id === $assessment->rotation->institution_id;
+        return $user->id === $assessment->assessor_id;
     }
 
     public function delete(User $user, Assessment $assessment): bool
     {
-        if ($user->isSuperadmin()) {
-            return true;
-        }
-
-        return $user->isAdmin() && $user->institution_id === $assessment->rotation->institution_id;
+        return $user->isSuperadmin();
     }
 }

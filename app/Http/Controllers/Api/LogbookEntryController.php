@@ -12,7 +12,7 @@ class LogbookEntryController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = LogbookEntry::query()->with('rotation', 'clinicalSign', 'skill')->orderBy('encounter_date', 'desc');
+        $query = LogbookEntry::query()->with('rotation', 'clinicalSign', 'skill', 'student')->orderBy('encounter_date', 'desc');
 
         if ($user->isSuperadmin()) {
             // no scoping
@@ -23,6 +23,11 @@ class LogbookEntryController extends Controller
         } else {
             $query->where('student_id', $user->id);
         }
+
+        $query->when(
+            $request->boolean('needs_assessment'),
+            fn ($q) => $q->whereNotNull('skill_id')->whereDoesntHave('assessments')
+        );
 
         return $query->paginate(25);
     }

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assessment;
-use App\Models\Rotation;
+use App\Models\LogbookEntry;
 use Illuminate\Http\Request;
 
 class AssessmentController extends Controller
@@ -39,8 +39,7 @@ class AssessmentController extends Controller
         $this->authorize('create', Assessment::class);
 
         $data = $request->validate([
-            'rotation_id' => ['required', 'exists:rotations,id'],
-            'skill_id' => ['required', 'exists:skills,id'],
+            'logbook_entry_id' => ['required', 'exists:logbook_entries,id'],
             'score' => ['required', 'numeric', 'min:0'],
             'max_score' => ['required', 'numeric', 'gte:score'],
             'curriculum_version' => ['nullable', 'string', 'max:50'],
@@ -48,17 +47,20 @@ class AssessmentController extends Controller
         ]);
 
         $user = $request->user();
-        $rotation = Rotation::findOrFail($data['rotation_id']);
+        $logbookEntry = LogbookEntry::with('rotation')->findOrFail($data['logbook_entry_id']);
 
         abort_unless(
-            $user->isSuperadmin()
-                || ($user->isAdmin() && $user->institution_id === $rotation->institution_id)
-                || ($user->isLecturer() && $user->id === $rotation->supervisor_id),
+            $user->isSuperadmin() || $user->id === $logbookEntry->rotation->supervisor_id,
             403,
-            'You can only assess students on your own supervised rotations.'
+            "You can only assess your own students' logged encounters."
         );
 
-        $data['student_id'] = $rotation->student_id;
+        abort_if($logbookEntry->skill_id === null, 422, 'This encounter is not linked to a skill and cannot be scored.');
+
+        $data['rotation_id'] = $logbookEntry->rotation_id;
+        $data['skill_id'] = $logbookEntry->skill_id;
+        $data['student_id'] = $logbookEntry->student_id;
+        $data['logbook_entry_id'] = $logbookEntry->id;
         $data['assessor_id'] = $user->id;
 
         return Assessment::create($data);
