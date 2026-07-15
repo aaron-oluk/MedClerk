@@ -167,6 +167,19 @@
                             @enderror
                         </div>
 
+                        <div class="border-t border-gray-100 pt-6">
+                            <div class="flex items-start gap-3">
+                                <input id="consent_confirmed" name="consent_confirmed" type="checkbox" value="1" required
+                                       class="mt-1 rounded border-gray-300 text-teal-600 shadow-sm focus:ring-teal-500">
+                                <label for="consent_confirmed" class="text-sm text-gray-700">
+                                    {{ __('I confirm that verbal consent was obtained from the patient before this entry was recorded.') }}
+                                </label>
+                            </div>
+                            @error('consent_confirmed')
+                                <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+
                         <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 bg-teal-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-teal-500 focus:bg-teal-500 active:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             {{ __('Save entry') }}
                         </button>

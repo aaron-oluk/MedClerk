@@ -27,6 +27,8 @@ class LogbookEntry extends Model
         'notes',
         'signed_off_by',
         'signed_off_at',
+        'consent_confirmed',
+        'consent_confirmed_at',
     ];
 
     protected function casts(): array
@@ -35,6 +37,8 @@ class LogbookEntry extends Model
             'encounter_date' => 'date',
             'findings' => 'array',
             'signed_off_at' => 'datetime',
+            'consent_confirmed' => 'boolean',
+            'consent_confirmed_at' => 'datetime',
         ];
     }
 

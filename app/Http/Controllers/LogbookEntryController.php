@@ -67,6 +67,7 @@ class LogbookEntryController extends Controller
             'impression' => ['nullable', 'string'],
             'plan' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
+            'consent_confirmed' => ['accepted'],
         ]);
 
         $this->createEntry($request->user(), $data);
@@ -129,6 +130,10 @@ class LogbookEntryController extends Controller
         );
 
         $data['student_id'] = $rotation->student_id;
+
+        if (! empty($data['consent_confirmed'])) {
+            $data['consent_confirmed_at'] = now();
+        }
 
         $data['findings'] = collect($data)
             ->only(['chief_complaint', 'examination_findings', 'impression', 'plan'])

@@ -45,6 +45,7 @@ class LogbookEntryController extends Controller
             'encounter_date' => ['required', 'date'],
             'findings' => ['nullable', 'array'],
             'notes' => ['nullable', 'string'],
+            'consent_confirmed' => ['accepted'],
         ]);
 
         $rotation = Rotation::findOrFail($data['rotation_id']);
@@ -55,6 +56,7 @@ class LogbookEntryController extends Controller
         );
 
         $data['student_id'] = $rotation->student_id;
+        $data['consent_confirmed_at'] = now();
 
         return LogbookEntry::create($data);
     }

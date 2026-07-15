@@ -1,0 +1,63 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Department;
+use App\Models\Institution;
+use App\Models\LogbookEntry;
+use App\Models\Rotation;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class LogbookEntryTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function makeActiveRotation(User $student): Rotation
+    {
+        $institution = Institution::create(['name' => 'Test University', 'slug' => 'test-university-'.uniqid()]);
+        $department = Department::create(['institution_id' => $institution->id, 'name' => 'Medicine']);
+
+        return Rotation::create([
+            'institution_id' => $institution->id,
+            'department_id' => $department->id,
+            'student_id' => $student->id,
+            'name' => 'Internal Medicine',
+            'start_date' => now()->subWeek(),
+            'status' => 'active',
+        ]);
+    }
+
+    public function test_entry_cannot_be_created_without_consent(): void
+    {
+        $student = User::factory()->student()->create();
+        $rotation = $this->makeActiveRotation($student);
+
+        $response = $this->actingAs($student)->post('/logbook-entries', [
+            'rotation_id' => $rotation->id,
+            'encounter_date' => now()->toDateString(),
+        ]);
+
+        $response->assertSessionHasErrors('consent_confirmed');
+        $this->assertSame(0, LogbookEntry::count());
+    }
+
+    public function test_entry_can_be_created_with_consent_confirmed(): void
+    {
+        $student = User::factory()->student()->create();
+        $rotation = $this->makeActiveRotation($student);
+
+        $response = $this->actingAs($student)->post('/logbook-entries', [
+            'rotation_id' => $rotation->id,
+            'encounter_date' => now()->toDateString(),
+            'consent_confirmed' => '1',
+        ]);
+
+        $response->assertSessionHasNoErrors()->assertRedirect('/logbook-entries');
+
+        $entry = LogbookEntry::first();
+        $this->assertTrue($entry->consent_confirmed);
+        $this->assertNotNull($entry->consent_confirmed_at);
+    }
+}
