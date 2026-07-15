@@ -49,62 +49,88 @@
             </div>
 
             @if ($canCreate)
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <form method="POST" action="{{ route('assessments.store') }}" class="p-6 space-y-6">
-                        @csrf
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                        {{ __('Pending encounters to score') }}
+                    </h3>
 
-                        <h3 class="text-lg font-medium text-gray-900">
-                            {{ __('Score an assessment') }}
-                        </h3>
+                    <div class="space-y-6">
+                        @foreach ($pendingLogs as $log)
+                            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                                <div class="p-6 space-y-4">
+                                    <div>
+                                        <h4 class="font-medium text-gray-900">{{ $log->student->name }} — {{ $log->skill->name }}</h4>
+                                        <p class="text-sm text-gray-500">{{ $log->encounter_date->format('d M Y') }} · {{ $log->rotation->name }}</p>
+                                    </div>
 
-                        <div>
-                            <label for="logbook_entry_id" class="block font-medium text-sm text-gray-700">{{ __('Logged encounter') }}</label>
-                            <select id="logbook_entry_id" name="logbook_entry_id" required
-                                    class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
-                                @foreach ($pendingLogs as $log)
-                                    <option value="{{ $log->id }}" @selected(old('logbook_entry_id') == $log->id)>
-                                        {{ $log->student->name }} — {{ $log->skill->name }} ({{ $log->encounter_date->format('d M Y') }})
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('logbook_entry_id')
-                                <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
+                                    <div class="space-y-3 text-sm border-t border-gray-100 pt-4">
+                                        @if (! empty($log->findings['chief_complaint'] ?? null))
+                                            <div>
+                                                <p class="font-medium text-gray-700">{{ __('Chief complaint') }}</p>
+                                                <p class="text-gray-600 mt-1">{{ $log->findings['chief_complaint'] }}</p>
+                                            </div>
+                                        @endif
+                                        @if (! empty($log->findings['examination_findings'] ?? null))
+                                            <div>
+                                                <p class="font-medium text-gray-700">{{ __('Examination findings') }}</p>
+                                                <p class="text-gray-600 mt-1">{{ $log->findings['examination_findings'] }}</p>
+                                            </div>
+                                        @endif
+                                        @if (! empty($log->findings['impression'] ?? null))
+                                            <div>
+                                                <p class="font-medium text-gray-700">{{ __('Impression') }}</p>
+                                                <p class="text-gray-600 mt-1">{{ $log->findings['impression'] }}</p>
+                                            </div>
+                                        @endif
+                                        @if (! empty($log->findings['plan'] ?? null))
+                                            <div>
+                                                <p class="font-medium text-gray-700">{{ __('Plan') }}</p>
+                                                <p class="text-gray-600 mt-1">{{ $log->findings['plan'] }}</p>
+                                            </div>
+                                        @endif
+                                        @if ($log->notes)
+                                            <div>
+                                                <p class="font-medium text-gray-700">{{ __('Notes') }}</p>
+                                                <p class="text-gray-600 mt-1">{{ $log->notes }}</p>
+                                            </div>
+                                        @endif
+                                        @if (empty($log->findings) && ! $log->notes)
+                                            <p class="text-gray-500 italic">{{ __('No structured findings recorded for this encounter.') }}</p>
+                                        @endif
+                                    </div>
 
-                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                            <div>
-                                <label for="score" class="block font-medium text-sm text-gray-700">{{ __('Score') }}</label>
-                                <input id="score" name="score" type="number" step="0.01" min="0" value="{{ old('score') }}" required
-                                       class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
-                                @error('score')
-                                    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
-                                @enderror
+                                    <form method="POST" action="{{ route('assessments.store') }}" class="border-t border-gray-100 pt-4 space-y-4">
+                                        @csrf
+                                        <input type="hidden" name="logbook_entry_id" value="{{ $log->id }}">
+
+                                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:items-end">
+                                            <div>
+                                                <label for="score-{{ $log->id }}" class="block font-medium text-sm text-gray-700">{{ __('Score') }}</label>
+                                                <input id="score-{{ $log->id }}" name="score" type="number" step="0.01" min="0" required
+                                                       class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
+                                            </div>
+
+                                            <div>
+                                                <label for="max_score-{{ $log->id }}" class="block font-medium text-sm text-gray-700">{{ __('Out of') }}</label>
+                                                <input id="max_score-{{ $log->id }}" name="max_score" type="number" step="0.01" min="0" value="20" required
+                                                       class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
+                                            </div>
+
+                                            <div>
+                                                <label for="assessed_at-{{ $log->id }}" class="block font-medium text-sm text-gray-700">{{ __('Assessed on') }}</label>
+                                                <input id="assessed_at-{{ $log->id }}" name="assessed_at" type="date" value="{{ now()->toDateString() }}" required
+                                                       class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 bg-teal-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-teal-500 focus:bg-teal-500 active:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                            {{ __('Save assessment') }}
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
-
-                            <div>
-                                <label for="max_score" class="block font-medium text-sm text-gray-700">{{ __('Maximum score') }}</label>
-                                <input id="max_score" name="max_score" type="number" step="0.01" min="0" value="{{ old('max_score', 20) }}" required
-                                       class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
-                                @error('max_score')
-                                    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="assessed_at" class="block font-medium text-sm text-gray-700">{{ __('Assessed on') }}</label>
-                            <input id="assessed_at" name="assessed_at" type="date" value="{{ old('assessed_at', now()->toDateString()) }}" required
-                                   class="mt-1 block w-full border-gray-300 focus:border-teal-500 focus:ring-teal-500 rounded-lg shadow-sm">
-                            @error('assessed_at')
-                                <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 bg-teal-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-teal-500 focus:bg-teal-500 active:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            {{ __('Save assessment') }}
-                        </button>
-                    </form>
+                        @endforeach
+                    </div>
                 </div>
             @endif
         </div>
