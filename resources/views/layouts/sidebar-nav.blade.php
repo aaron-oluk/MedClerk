@@ -36,7 +36,7 @@
             <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
             </svg>
-            {{ __('Clinical Library') }}
+            {{ __('Clinical Reference') }}
         </a>
 
         <a href="{{ route('skills.index') }}" class="{{ $navClasses(request()->routeIs('skills.*')) }}">
@@ -59,6 +59,15 @@
             </svg>
             {{ __('Feedback') }}
         </a>
+
+        @if (Auth::user()->role === 'lecturer')
+            <a href="{{ route('students.search') }}" class="{{ $navClasses(request()->routeIs('students.*')) }}">
+                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+                {{ __('Find a student') }}
+            </a>
+        @endif
 
         @if (in_array(Auth::user()->role, ['admin', 'superadmin']))
             <a href="{{ route('programs.index') }}" class="{{ $navClasses(request()->routeIs('programs.*')) }}">
@@ -86,6 +95,11 @@
         <a href="{{ route('profile.edit') }}"
            class="block rounded-md px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition {{ request()->routeIs('profile.edit') ? 'bg-teal-50 text-teal-700' : '' }}">
             {{ __('Profile') }}
+        </a>
+
+        <a href="{{ route('settings.edit') }}"
+           class="block rounded-md px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition {{ request()->routeIs('settings.edit') ? 'bg-teal-50 text-teal-700' : '' }}">
+            {{ __('Settings') }}
         </a>
 
         <form method="POST" action="{{ route('logout') }}">

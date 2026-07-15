@@ -5,9 +5,11 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Institution;
 use App\Models\Department;
+use App\Models\Rotation;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -35,6 +37,7 @@ class User extends Authenticatable
         'institution_id',
         'department_id',
         'student_number',
+        'email_notifications_enabled',
     ];
 
     /**
@@ -57,6 +60,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'email_notifications_enabled' => 'boolean',
         ];
     }
 
@@ -68,6 +72,35 @@ class User extends Authenticatable
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function cohortEnrollments(): HasMany
+    {
+        return $this->hasMany(CohortEnrollment::class, 'user_id');
+    }
+
+    public function currentCohortEnrollment(): ?CohortEnrollment
+    {
+        return $this->cohortEnrollments()
+            ->where('status', 'active')
+            ->latest('enrolled_at')
+            ->with('cohort.program')
+            ->first();
+    }
+
+    /**
+     * @return array<string, string|null>
+     */
+    public function profileSummary(?Rotation $activeRotation = null): array
+    {
+        return [
+            'name' => $this->name,
+            'registration_number' => $this->student_number,
+            'email' => $this->email,
+            'institution' => $this->institution?->name,
+            'programme' => $this->currentCohortEnrollment()?->cohort?->program?->name,
+            'placement' => $activeRotation?->name,
+        ];
     }
 
     public function isStudent(): bool

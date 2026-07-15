@@ -24,7 +24,7 @@
                         Clinical education, assessed with confidence.
                     </h1>
                     <p class="mt-4 text-slate-300 leading-relaxed">
-                        One shared home for the clinical signs library, the digital logbook, curriculum aligned assessments and structured feedback across your program.
+                        One shared home for the clinical signs reference, the digital logbook, curriculum aligned assessments and structured feedback across your program.
                     </p>
 
                     <ul class="mt-8 space-y-3 text-sm text-slate-300">

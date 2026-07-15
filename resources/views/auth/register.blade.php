@@ -3,7 +3,7 @@
 @section('content')
     <div class="mb-8">
         <h2 class="text-2xl font-semibold text-gray-900">{{ __('Create your account') }}</h2>
-        <p class="mt-1 text-sm text-gray-500">{{ __('Get access to your clinical library, logbook and assessments.') }}</p>
+        <p class="mt-1 text-sm text-gray-500">{{ __('Get access to your clinical reference, logbook and assessments.') }}</p>
     </div>
 
     <form method="POST" action="{{ route('register') }}" class="space-y-5">

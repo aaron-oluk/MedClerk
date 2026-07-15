@@ -13,6 +13,36 @@
                 {{ __('Welcome back, :name.', ['name' => Auth::user()->name]) }}
             </p>
 
+            <!-- Student profile summary -->
+            @isset($profile)
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('Your profile') }}</h3>
+
+                    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 text-sm">
+                        <div>
+                            <dt class="text-gray-500">{{ __('Name') }}</dt>
+                            <dd class="mt-1 font-medium text-gray-900">{{ $profile['name'] }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500">{{ __('Registration number') }}</dt>
+                            <dd class="mt-1 font-medium text-gray-900">{{ $profile['registration_number'] ?? 'Not set' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500">{{ __('Programme') }}</dt>
+                            <dd class="mt-1 font-medium text-gray-900">{{ $profile['programme'] ?? 'Not set' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500">{{ __('University') }}</dt>
+                            <dd class="mt-1 font-medium text-gray-900">{{ $profile['institution'] ?? 'Not set' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500">{{ __('Current placement') }}</dt>
+                            <dd class="mt-1 font-medium text-gray-900">{{ $profile['placement'] ?? 'Not set' }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            @endisset
+
             <!-- Stat cards -->
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach ($stats as $stat)

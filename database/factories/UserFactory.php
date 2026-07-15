@@ -42,4 +42,25 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Indicate that the model is a student.
+     */
+    public function student(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_STUDENT,
+            'student_number' => fake()->unique()->numerify('REG-#####'),
+        ]);
+    }
+
+    /**
+     * Indicate that the model is a lecturer.
+     */
+    public function lecturer(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_LECTURER,
+        ]);
+    }
 }

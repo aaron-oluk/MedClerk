@@ -159,6 +159,7 @@ class DashboardController extends Controller
             'recentLogbookEntries' => $recentLogbookEntries,
             'recentAssessments' => collect(),
             'recentFeedback' => $recentFeedback,
+            'profile' => $user->profileSummary($activeRotation),
         ]);
     }
 }

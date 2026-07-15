@@ -2,21 +2,26 @@
 
 MedClerk is a clinical education and competency assessment platform for medical students. It combines an interactive library of clinical signs and examination techniques with digital, curriculum aligned assessment tools, giving lecturers a way to standardize scoring and giving students structured feedback on their clinical rotations. It is designed for multi institution deployment, with role based access and a full audit trail on every academic record.
 
+The platform has two client surfaces sharing one Laravel backend: a Blade web app for lecturers and admins to manage content and records, and a native Android app ([MedClerkMobile](../MedClerkMobile)) for students in the field. See that project's README for the mobile app specifically.
+
 ## Tech stack
 
 - Backend: Laravel 12 (PHP 8.2+), RESTful API secured with Laravel Sanctum for the mobile client
 - Web frontend: Laravel Blade with Alpine.js for interactivity and Tailwind CSS for styling
 - Database: PostgreSQL
 - Auth: Laravel Breeze session auth for the web app, Sanctum tokens for API clients
+- Mobile client: native Android (Kotlin/Jetpack Compose), consuming the same REST API — see [MedClerkMobile](../MedClerkMobile)
 
 ## Core features
 
-- **Clinical learning library**: clinical systems, individual clinical signs with interpretation and diagnostic relevance, multimedia links, and searchable tags
-- **Skills**: step by step procedure tutorials mapped to competency codes
+- **Clinical learning library**: clinical systems (each with an icon and colour for UI theming) containing clinical signs and skills, searchable by name or tag
+- **Clinical signs**: interpretation, diagnostic relevance, eliciting technique, eponym, difficulty (core/intermediate/advanced), red flags, last-reviewed date, and multimedia links with type/duration metadata
+- **Skills**: structured, step by step procedure tutorials (each step has a title, detail, and optional caution note), mapped to competency codes, with required equipment and an estimated duration
+- **Competency mastery scoring**: average assessment performance per clinical system and per skill, computed server-side and surfaced as mastery percentages in the library and on student dashboards
 - **Digital logbook**: students record clinical encounters against their active rotation, with structured findings captured as distinct fields rather than one block of free text
 - **Assessment engine**: curriculum aligned scoring tied to a specific student, skill, and rotation, recorded by the supervising lecturer
 - **Feedback**: structured feedback covering strengths, areas to improve, and a follow up date
-- **Rotations**: clerkship placements linking a student, supervisor, department, and institution
+- **Rotations**: clerkship placements linking a student, supervisor, department, and institution, with a target number of required encounters to track progress against
 - **Programs and cohorts**: curricula and student batch tracking over time, with cohort enrollment
 - **Institutions**: multi institution support built in from the start
 - **Dashboard**: role aware summary of activity, scoped to what each role is allowed to see

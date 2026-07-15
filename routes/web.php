@@ -10,7 +10,9 @@ use App\Http\Controllers\LogbookEntryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\RotationController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SkillController;
+use App\Http\Controllers\StudentLookupController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +28,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
+    Route::patch('/settings', [SettingsController::class, 'update'])->name('settings.update');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -48,6 +53,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
     Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
+});
+
+Route::middleware(['auth', 'verified', 'role:' . User::ROLE_LECTURER])->group(function () {
+    Route::get('/students/search', [StudentLookupController::class, 'search'])->name('students.search');
+    Route::get('/students/{student}', [StudentLookupController::class, 'show'])->name('students.show');
 });
 
 Route::middleware(['auth', 'verified', 'role:' . User::ROLE_ADMIN . ',' . User::ROLE_SUPERADMIN])->group(function () {
