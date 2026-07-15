@@ -13,6 +13,7 @@ use App\Http\Controllers\RotationController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\StudentLookupController;
+use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -70,6 +71,10 @@ Route::middleware(['auth', 'verified', 'role:' . User::ROLE_ADMIN . ',' . User::
     Route::post('/programs/{program}/cohorts', [CohortController::class, 'store'])->name('programs.cohorts.store');
 
     Route::post('/cohorts/{cohort}/enrollments', [CohortController::class, 'storeEnrollment'])->name('cohorts.enrollments.store');
+
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
 });
 
 require __DIR__.'/auth.php';

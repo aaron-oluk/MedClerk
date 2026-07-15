@@ -60,4 +60,36 @@ class LogbookEntryTest extends TestCase
         $this->assertTrue($entry->consent_confirmed);
         $this->assertNotNull($entry->consent_confirmed_at);
     }
+
+    public function test_lecturer_cannot_create_a_logbook_entry(): void
+    {
+        $student = User::factory()->student()->create();
+        $rotation = $this->makeActiveRotation($student);
+        $lecturer = User::factory()->lecturer()->create(['institution_id' => $rotation->institution_id]);
+
+        $response = $this->actingAs($lecturer)->post('/logbook-entries', [
+            'rotation_id' => $rotation->id,
+            'encounter_date' => now()->toDateString(),
+            'consent_confirmed' => '1',
+        ]);
+
+        $response->assertForbidden();
+        $this->assertSame(0, LogbookEntry::count());
+    }
+
+    public function test_admin_cannot_create_a_logbook_entry(): void
+    {
+        $student = User::factory()->student()->create();
+        $rotation = $this->makeActiveRotation($student);
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN, 'institution_id' => $rotation->institution_id]);
+
+        $response = $this->actingAs($admin)->post('/logbook-entries', [
+            'rotation_id' => $rotation->id,
+            'encounter_date' => now()->toDateString(),
+            'consent_confirmed' => '1',
+        ]);
+
+        $response->assertForbidden();
+        $this->assertSame(0, LogbookEntry::count());
+    }
 }

@@ -123,11 +123,7 @@ class LogbookEntryController extends Controller
     {
         $rotation = Rotation::findOrFail($data['rotation_id']);
 
-        abort_unless(
-            $actingUser->isAdmin() || $actingUser->isSuperadmin() || $actingUser->id === $rotation->student_id,
-            403,
-            'You can only log encounters for your own rotation.'
-        );
+        abort_unless($actingUser->id === $rotation->student_id, 403, 'You can only log encounters for your own rotation.');
 
         $data['student_id'] = $rotation->student_id;
 

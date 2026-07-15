@@ -59,6 +59,14 @@ class AssessmentController extends Controller
 
         $rotation = Rotation::findOrFail($data['rotation_id']);
 
+        abort_unless(
+            $request->user()->isSuperadmin()
+                || ($request->user()->isAdmin() && $request->user()->institution_id === $rotation->institution_id)
+                || ($request->user()->isLecturer() && $request->user()->id === $rotation->supervisor_id),
+            403,
+            'You can only assess students on your own supervised rotations.'
+        );
+
         $data['student_id'] = $rotation->student_id;
         $data['assessor_id'] = $request->user()->id;
 

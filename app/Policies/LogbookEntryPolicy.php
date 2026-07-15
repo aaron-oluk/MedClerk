@@ -24,7 +24,7 @@ class LogbookEntryPolicy
 
     public function create(User $user): bool
     {
-        return $user->isStudent() || $user->isAdmin() || $user->isSuperadmin();
+        return $user->isStudent();
     }
 
     public function update(User $user, LogbookEntry $logbookEntry): bool

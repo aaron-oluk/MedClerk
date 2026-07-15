@@ -38,6 +38,7 @@ class User extends Authenticatable
         'department_id',
         'student_number',
         'email_notifications_enabled',
+        'is_active',
     ];
 
     /**
@@ -61,6 +62,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'email_notifications_enabled' => 'boolean',
+            'is_active' => 'boolean',
         ];
     }
 

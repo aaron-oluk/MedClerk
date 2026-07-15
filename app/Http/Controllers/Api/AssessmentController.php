@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assessment;
+use App\Models\Rotation;
 use Illuminate\Http\Request;
 
 class AssessmentController extends Controller
@@ -38,16 +39,27 @@ class AssessmentController extends Controller
         $this->authorize('create', Assessment::class);
 
         $data = $request->validate([
-            'student_id' => ['required', 'exists:users,id'],
-            'skill_id' => ['required', 'exists:skills,id'],
             'rotation_id' => ['required', 'exists:rotations,id'],
+            'skill_id' => ['required', 'exists:skills,id'],
             'score' => ['required', 'numeric', 'min:0'],
             'max_score' => ['required', 'numeric', 'gte:score'],
             'curriculum_version' => ['nullable', 'string', 'max:50'],
             'assessed_at' => ['required', 'date'],
         ]);
 
-        $data['assessor_id'] = $request->user()->id;
+        $user = $request->user();
+        $rotation = Rotation::findOrFail($data['rotation_id']);
+
+        abort_unless(
+            $user->isSuperadmin()
+                || ($user->isAdmin() && $user->institution_id === $rotation->institution_id)
+                || ($user->isLecturer() && $user->id === $rotation->supervisor_id),
+            403,
+            'You can only assess students on your own supervised rotations.'
+        );
+
+        $data['student_id'] = $rotation->student_id;
+        $data['assessor_id'] = $user->id;
 
         return Assessment::create($data);
     }

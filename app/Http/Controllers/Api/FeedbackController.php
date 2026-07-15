@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Assessment;
 use App\Models\Feedback;
 use Illuminate\Http\Request;
 
@@ -38,14 +39,25 @@ class FeedbackController extends Controller
         $this->authorize('create', Feedback::class);
 
         $data = $request->validate([
-            'student_id' => ['required', 'exists:users,id'],
-            'assessment_id' => ['nullable', 'exists:assessments,id'],
+            'assessment_id' => ['required', 'exists:assessments,id'],
             'strengths' => ['nullable', 'string'],
             'areas_to_improve' => ['nullable', 'string'],
             'follow_up_date' => ['nullable', 'date'],
         ]);
 
-        $data['given_by'] = $request->user()->id;
+        $user = $request->user();
+        $assessment = Assessment::with('rotation')->findOrFail($data['assessment_id']);
+
+        abort_unless(
+            $user->isSuperadmin()
+                || ($user->isAdmin() && $user->institution_id === $assessment->rotation->institution_id)
+                || ($user->isLecturer() && $user->id === $assessment->assessor_id),
+            403,
+            'You can only give feedback on assessments you gave.'
+        );
+
+        $data['student_id'] = $assessment->student_id;
+        $data['given_by'] = $user->id;
 
         return Feedback::create($data);
     }
